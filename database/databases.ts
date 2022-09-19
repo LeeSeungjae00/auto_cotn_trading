@@ -3,11 +3,11 @@ import * as dotenv from 'dotenv';
 dotenv.config();
 
 const db_info: Object = {
-    host: 'localhost',
-    port: '3306',
-    user: 'root',
+    host: process.env.DATABASE_URL,
+    port: process.env.DATABASE_PORT,
+    user: process.env.DATABASE_USER,
     password: process.env.DATABASE_PW,
-    database: 'coinAutoTrading'
+    database: process.env.DATABASE_USE_DATABASE
 }
 
 export function dbInit() {

@@ -26,10 +26,8 @@ app.use(express.urlencoded({ extended: true }));
 const conn = dbInit();
 dbConnect(conn)
 
-
-let checkCoinListJob = new CronJob.CronJob('0 0 9 * * *', async () => {
-    try {
-        await checkCoinList(conn);
+async function initCoinAutoTrading() {
+    await checkCoinList(conn);
         const myAccount = await getMyAccount();
 
         let buyCoin = await getNowBuyCoin(conn) as RowDataPacket[];
@@ -46,6 +44,12 @@ let checkCoinListJob = new CronJob.CronJob('0 0 9 * * *', async () => {
             slackSend(`[다음날 전량 매도] ${coin.market}을 ${nowPrice}에 매도 하였습니다.`);
             updateDateBalance(conn);
         });
+}
+
+
+let checkCoinListJob = new CronJob.CronJob('0 0 9 * * *', async () => {
+    try {
+        initCoinAutoTrading();
     } catch (e) {
         console.error(e)
         slackSend(`[checkCoinListJob] ${e}`);
@@ -93,7 +97,7 @@ app.get('/buyCoin', async (req, res) => {
         res.send(
             buyCoin.map(
                 (coin, index) => {
-                    const np = nowPrice[index].trade_price;
+                    const np : number = nowPrice[index].trade_price;
                     const pre = ((np - coin.buyPrice) / np * 100).toFixed(2);
                     return {
                         market: coin.market,
